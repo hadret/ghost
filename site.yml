@@ -1,0 +1,29 @@
+---
+- hosts: all
+  become: true
+  tasks:
+    - name: Upgrade the OS, autoremove & autoclean
+      ansible.builtin.apt:
+        pkg: "*"
+        state: latest # noqa package-latest
+        autoremove: true
+        autoclean: true
+        update_cache: true
+        cache_valid_time: 3600
+
+- hosts: lbs, workers
+  become: true
+  vars_files:
+    - vars/main.yml
+  roles:
+    - geerlingguy.pip
+    - geerlingguy.docker
+
+- hosts: dbs
+  become: true
+  vars_files:
+    - vars/main.yml
+  roles:
+    - geerlingguy.mysql
+  tags:
+    - db

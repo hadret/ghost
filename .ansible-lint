@@ -1,0 +1,5 @@
+parseable: true
+quiet: true
+verbosity: 1
+exclude_paths:
+  - ./roles/external/
