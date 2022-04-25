@@ -1,0 +1,64 @@
+version: '3.8'
+
+configs:
+  certificates.yaml:
+    external: true
+
+secrets:
+  fullchain.pem:
+    external: true
+  privkey.pem:
+    external: true
+
+networks:
+  public:
+    external: true
+
+services:
+  traefik:
+    image: traefik:v2.6
+    ports:
+      - 80:80
+      - 443:443
+    deploy:
+      mode: global
+      placement:
+        constraints:
+          - node.role == manager
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.traefik.rule=Host(`traefik.swarm.chbk.co`)"
+        - "traefik.http.routers.traefik.entrypoints=websecure"
+        - "traefik.http.routers.traefik.service=api@internal"
+        - "traefik.http.services.dummy-svc.loadbalancer.server.port=9999"
+    configs:
+      - certificates.yaml
+    secrets:
+      - fullchain.pem
+      - privkey.pem
+    networks:
+      - public
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    command:
+      # Tell Traefik to discover containers in Docker Swarm
+      - --providers.docker=true
+      - --providers.docker.exposedByDefault=false
+      - --providers.docker.swarmMode=true
+      # Enable access log
+      - --accesslog=true
+      # Debugging all the things
+      # - --log.level=DEBUG
+      # Setup config file for certs
+      - --providers.file.filename=/certificates.yaml
+      # Enable Traefik dashboard
+      - --api.dashboard=true
+      # Set up an insecure listener that redirects all traffic to TLS
+      - --entrypoints.web.address=:80
+      - --entrypoints.web.http.redirections.entrypoint.to=websecure
+      - --entrypoints.web.http.redirections.entrypoint.scheme=https
+      # Set up the TLS configuration for our websecure listener
+      - --entrypoints.websecure.address=:443
+      - --entrypoints.websecure.http.tls=true
+      - --entrypoints.websecure.http.tls.domains[0].main=swarm.chbk.co
+      - --entrypoints.websecure.http.tls.domains[0].sans=*.swarm.chbk.co

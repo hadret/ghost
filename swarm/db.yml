@@ -1,0 +1,29 @@
+version: '3.8'
+
+secrets:
+  db_root_password:
+    external: true
+
+networks:
+  db:
+    external: true
+
+volumes:
+    db_data:
+
+services:
+  db:
+    image: mysql:8-debian
+    volumes:
+       - db_data:/var/lib/mysql
+    deploy:
+      placement:
+        constraints:
+          - node.role == worker
+          - node.labels.db-data == true
+    environment:
+      MYSQL_ROOT_PASSWORD_FILE: /run/secrets/db_root_password
+    secrets:
+      - db_root_password
+    networks:
+      - db

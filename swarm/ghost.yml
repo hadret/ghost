@@ -1,0 +1,34 @@
+version: '3.8'
+
+networks:
+  public:
+    external: true
+  db:
+    external: true
+
+services:
+  ghost:
+    depends_on:
+      - db
+    image: ghost:4-alpine
+    deploy:
+      placement:
+        constraints:
+          - node.role == worker
+      labels:
+        - "traefik.enable=true"
+        - "traefik.docker.network=public"
+        - "traefik.constraint-label=public"
+        - "traefik.http.routers.${GHOST:?err}.rule=Host(`${GHOST:?err}.swarm.chbk.co`)"
+        - "traefik.http.routers.${GHOST:?err}.entrypoints=websecure"
+        - "traefik.http.services.${GHOST:?err}.loadBalancer.server.port=2368"
+    environment:
+      database__client: mysql
+      database__connection__host: db
+      database__connection__user: root
+      database__connection__password: ${DB_PASSWORD:?err}
+      database__connection__database: ${GHOST:?err}
+      url: https://${GHOST:?err}.swarm.chbk.co
+    networks:
+      - public
+      - db

@@ -1,0 +1,11 @@
+tls:
+  certificates:
+    - certFile: "/run/secrets/fullchain.pem"
+      keyFile: "/run/secrets/privkey.pem"
+      stores:
+        - default
+  stores:
+    default:
+      defaultCertificate:
+        certFile: "/run/secrets/fullchain.pem"
+        keyFile: "/run/secrets/privkey.pem"
