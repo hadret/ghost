@@ -4,5 +4,3 @@ roles:
     version: '4.2.2'
   - src: geerlingguy.pip
     version: '2.1.0'
-  - src: geerlingguy.mysql
-    version: '3.3.2'
