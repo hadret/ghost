@@ -198,3 +198,27 @@ with the name specified by `GHOST`.
 
 If everything went well, Ghost instance should be up and running under
 https://ghost.swarm.chbk.co 🎉
+
+### (Optional) Portainer
+
+If you fancy some GUI to look at your awesome containers, give [Portainer](https://www.portainer.io) 
+a try. The stack deploys two services: one is a global one called
+`portainer_agent` that goes to every single instance in the cluster to gather
+data about it and the second one is stateful, i.e. it's gonna require volume to
+run properly.
+
+Set a label on one of the manager nodes to handle data:
+
+```
+docker node update --label-add portainer-data=true swarm-lb-1
+```
+
+Rollout the stack:
+
+```
+docker stack deploy -c swarm/portainer.yml portainer
+```
+
+If everything went as it shoud, Portainer instance will be available under
+https://portainer.swarm.chbk.co.
+
